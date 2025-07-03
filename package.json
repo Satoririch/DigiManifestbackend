@@ -1,4 +1,3 @@
-{
 “name”: “digimanifest-backend”,
 “version”: “1.0.0”,
 “description”: “DigiManifest backend server with Stripe payments”,
@@ -16,4 +15,4 @@
 “engines”: {
 “node”: “>=18.0.0”
 }
-}
+
