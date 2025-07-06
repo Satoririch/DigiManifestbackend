@@ -33,6 +33,34 @@ app.get('/api/stripe-config', (req, res) => {
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY, // This should be set in Railway Variables
   });
 });
+// 2. Route to create a Stripe Checkout Session for subscriptions
+app.post('/api/create-subscription', async (req, res) => {
+  const { priceId } = req.body; // Frontend sends the priceId (monthly/yearly)
+
+  // Ensure the received priceId is one of your valid ones
+  if (!Object.values(validPriceIds).includes(priceId)) {
+    return res.status(400).json({ error: 'Invalid price ID provided.' });
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      line_items: [{
+        price: priceId, // Use the priceId from your validPriceIds
+        quantity: 1,
+      }],
+      success_url: `${process.env.FRONTEND_DOMAIN}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_DOMAIN}/cancel.html`,
+      // Add customer email if you have it from your frontend login
+      // customer_email: 'user@example.com',
+    });
+
+    res.json({ sessionId: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 // --- Server Start ---
